@@ -89,12 +89,14 @@ class StatusIndicator(QStatus, Ui_Status):
         #print(kwargs.keys())
         #print(kwargs['obj'])
 
+
+        all_status = []
         name = kwargs['obj'].name
         self.status[name] = kwargs['value']
 
-        all_status = []
         for key,value in self.status.items():
             all_status.append(value)
+
         status = any(all_status)
 
         self.statusLabel.setText(self.status_names[int(status)])
