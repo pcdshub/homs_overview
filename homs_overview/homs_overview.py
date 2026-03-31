@@ -34,6 +34,7 @@ class App(Display):
         #self.MR1L3.connect_mirror('MR1L3')
         #self.MR2L3.connect_mirror('MR2L3')
         #self.MR1L4.connect_mirror('MR1L4')
+        self.prev_destination='Unknown'
         self.destination = 'XCS'
         self.curr_range = [0,0]
         self.bg = 'purple'
@@ -157,23 +158,57 @@ class App(Display):
             self.curr_range = [0,0]
             width = 200
 
-        pitch_correct = np.zeros(5)
+        #pitch_correct = np.zeros(5)
 
-        for num, mirror in enumerate(self.mirror_list):
-            pitch_correct[num] = mirror.check_pitch()
+        #for num, mirror in enumerate(self.mirror_list):
+        #    pitch_correct[num] = mirror.check_pitch()
 
-        if pitch_correct[0]==1:
-            self.ui.pitch_status_label.setText('MR1L0 Pitch Nominal')
-            self.ui.pitch_status_label.setStyleSheet('background-color: %s' % ('green'))
-        else:
-            self.ui.pitch_status_label.setText('Check MR1L0 Pitch')
-            self.ui.pitch_status_label.setStyleSheet('background-color: %s' % ('red'))
+        #if pitch_correct[0]==1:
+        #    self.ui.pitch_status_label.setText('MR1L0 Pitch Nominal')
+        #    self.ui.pitch_status_label.setStyleSheet('background-color: %s' % ('green'))
+        #else:
+        #    self.ui.pitch_status_label.setText('Check MR1L0 Pitch')
+        #    self.ui.pitch_status_label.setStyleSheet('background-color: %s' % ('red'))
         
         
         self.ui.beamLabel.setText(self.destination)
         self.ui.beamLabel.setStyleSheet("background-color: %s; color: %s" % (self.bg,self.color))
         self.ui.beamLabel.setFixedWidth(width)
         self.ui.energyLabel.setText('%.1f-%.1f keV' % (self.curr_range[0],self.curr_range[1]))
+
+        if self.destination != self.prev_destination:
+            if self.destination=='CXI':
+                self.pitchGroupbox.setTitle('Adjust Undulators')
+                self.NegTweakButton.channel = None# 'ca://MR2L0:HOMS:MMS:PITCH.TWR'
+                self.PosTweakButton.channel = None#'ca://MR2L0:HOMS:MMS:PITCH.TWF'
+                self.TweakAmountLineEdit.channel = None#'ca://MR2L0:HOMS:MMS:PITCH.TWV'
+                self.PitchReadbackLabel.channel = None#'ca://MR2L0:HOMS:MMS:PITCH.RBV'
+
+            elif self.destination=='Unknown':
+                self.pitchGroupbox.setTitle('Wait for transition to complete')
+                self.NegTweakButton.channel = None# 'ca://MR2L0:HOMS:MMS:PITCH.TWR'
+                self.PosTweakButton.channel = None#'ca://MR2L0:HOMS:MMS:PITCH.TWF'
+                self.TweakAmountLineEdit.channel = None#'ca://MR2L0:HOMS:MMS:PITCH.TWV'
+                self.PitchReadbackLabel.channel = None#'ca://MR2L0:HOMS:MMS:PITCH.RBV'
+
+
+
+            elif self.destination=='MFX' or self.destination=='MEC':
+                self.pitchGroupbox.setTitle('MR1L4 Pitch Adjustment')
+                self.NegTweakButton.channel = 'ca://MR1L4:HOMS:MMS:PITCH.TWR'
+                self.PosTweakButton.channel = 'ca://MR1L4:HOMS:MMS:PITCH.TWF'
+                self.TweakAmountLineEdit.channel = 'ca://MR1L4:HOMS:MMS:PITCH.TWV'
+                self.PitchReadbackLabel.channel = 'ca://MR1L4:HOMS:MMS:PITCH.RBV'
+
+            elif self.destination=='XCS':
+                self.pitchGroupbox.setTitle('MR1L3 Pitch Adjustment')
+                self.NegTweakButton.channel = 'ca://MR1L3:HOMS:MMS:PITCH.TWR'
+                self.PosTweakButton.channel = 'ca://MR1L3:HOMS:MMS:PITCH.TWF'
+                self.TweakAmountLineEdit.channel = 'ca://MR1L3:HOMS:MMS:PITCH.TWV'
+                self.PitchReadbackLabel.channel = 'ca://MR1L3:HOMS:MMS:PITCH.RBV'
+
+            self.prev_destination = str(self.destination)
+
 
 
     def populate_energy_range(self):
